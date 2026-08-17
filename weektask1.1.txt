@@ -1,0 +1,313 @@
+import java.util.*;
+
+class Product {
+    int id;
+    String name;
+    double price;
+    int stock;
+    int sold;
+
+    Product(int id, String name, double price, int stock) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.sold = 0;
+    }
+}
+
+class Supermarket {
+    HashMap<Integer, Product> products = new HashMap<>();
+
+    // Add product
+    void addProduct(Product p) {
+        products.put(p.id, p);
+        System.out.println("Product added successfully.");
+    }
+
+    // Remove product
+    void removeProduct(int id) {
+        if (products.remove(id) != null)
+            System.out.println("Product removed.");
+        else
+            System.out.println("Product not found.");
+    }
+
+    // Display products
+    void displayProducts() {
+        System.out.println("\n--- Product Inventory ---");
+
+        for (Product p : products.values()) {
+            System.out.println(
+                p.id + " | " + p.name +
+                " | Rs." + p.price +
+                " | Stock: " + p.stock +
+                " | Sold: " + p.sold
+            );
+        }
+    }
+
+    // Generate bill
+    void generateBill(int id, int quantity) {
+
+        Product p = products.get(id);
+
+        if (p == null) {
+            System.out.println("Product not found.");
+            return;
+        }
+
+        if (quantity <= 0) {
+            System.out.println("Invalid quantity.");
+            return;
+        }
+
+        if (p.stock < quantity) {
+            System.out.println("Insufficient stock.");
+            return;
+        }
+
+        double subtotal = p.price * quantity;
+
+        // Discount
+        double discount = 0;
+
+        if (subtotal >= 5000) {
+            discount = subtotal * 0.20;
+        } else if (subtotal >= 2000) {
+            discount = subtotal * 0.10;
+        } else if (subtotal >= 1000) {
+            discount = subtotal * 0.05;
+        }
+
+        double finalAmount = subtotal - discount;
+
+        // Update inventory
+        p.stock -= quantity;
+        p.sold += quantity;
+
+        System.out.println("\n========== INVOICE ==========");
+        System.out.println("Product   : " + p.name);
+        System.out.println("Quantity  : " + quantity);
+        System.out.println("Price     : Rs." + p.price);
+        System.out.println("Subtotal  : Rs." + subtotal);
+        System.out.println("Discount  : Rs." + discount);
+        System.out.println("-----------------------------");
+        System.out.println("Total Bill: Rs." + finalAmount);
+        System.out.println("=============================");
+    }
+
+    // Apply coupon
+    void couponBill(int id, int quantity, String coupon) {
+
+        Product p = products.get(id);
+
+        if (p == null || p.stock < quantity) {
+            System.out.println("Invalid product or insufficient stock.");
+            return;
+        }
+
+        double total = p.price * quantity;
+
+        // Normal discount
+        if (total >= 2000) {
+            total = total - (total * 0.10);
+        }
+
+        // Coupon discount
+        if (coupon.equalsIgnoreCase("SAVE20")) {
+            total = total - (total * 0.20);
+        } else if (coupon.equalsIgnoreCase("SAVE10")) {
+            total = total - (total * 0.10);
+        } else {
+            System.out.println("Invalid coupon.");
+        }
+
+        p.stock -= quantity;
+        p.sold += quantity;
+
+        System.out.println("\nCoupon applied.");
+        System.out.println("Final Bill: Rs." + total);
+    }
+
+    // Detect low stock
+    void lowStock() {
+
+        System.out.println("\n--- Low Stock Products ---");
+
+        boolean found = false;
+
+        for (Product p : products.values()) {
+
+            if (p.stock <= 5) {
+                System.out.println(
+                    p.name + " -> Stock: " + p.stock
+                );
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No low-stock products.");
+        }
+    }
+
+    // Most sold product
+    void mostSold() {
+
+        Product best = null;
+
+        for (Product p : products.values()) {
+
+            if (best == null || p.sold > best.sold) {
+                best = p;
+            }
+        }
+
+        if (best != null) {
+            System.out.println(
+                "\nMost Sold Product: " +
+                best.name +
+                " (" + best.sold + " units)"
+            );
+        }
+    }
+
+    // Sort products by sales
+    void sortBySales() {
+
+        ArrayList<Product> list =
+            new ArrayList<>(products.values());
+
+        list.sort(
+            (a, b) -> Integer.compare(b.sold, a.sold)
+        );
+
+        System.out.println("\n--- Products Sorted by Sales ---");
+
+        for (Product p : list) {
+            System.out.println(
+                p.name + " - " + p.sold + " units"
+            );
+        }
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        Supermarket market = new Supermarket();
+
+        // Sample products
+        market.addProduct(
+            new Product(1, "Rice", 500, 20)
+        );
+
+        market.addProduct(
+            new Product(2, "Milk", 60, 30)
+        );
+
+        market.addProduct(
+            new Product(3, "Sugar", 100, 10)
+        );
+
+        while (true) {
+
+            System.out.println("\n===== SUPERMARKET BILLING SYSTEM =====");
+            System.out.println("1. Add Product");
+            System.out.println("2. Remove Product");
+            System.out.println("3. Display Products");
+            System.out.println("4. Generate Bill");
+            System.out.println("5. Apply Coupon");
+            System.out.println("6. Low Stock Products");
+            System.out.println("7. Most Sold Product");
+            System.out.println("8. Sort Products by Sales");
+            System.out.println("9. Exit");
+            System.out.print("Enter choice: ");
+
+            int choice = sc.nextInt();
+
+            switch (choice) {
+
+                case 1:
+                    System.out.print("Enter product ID: ");
+                    int id = sc.nextInt();
+
+                    System.out.print("Enter product name: ");
+                    String name = sc.next();
+
+                    System.out.print("Enter price: ");
+                    double price = sc.nextDouble();
+
+                    System.out.print("Enter stock: ");
+                    int stock = sc.nextInt();
+
+                    market.addProduct(
+                        new Product(id, name, price, stock)
+                    );
+                    break;
+
+                case 2:
+                    System.out.print("Enter product ID: ");
+                    int removeId = sc.nextInt();
+
+                    market.removeProduct(removeId);
+                    break;
+
+                case 3:
+                    market.displayProducts();
+                    break;
+
+                case 4:
+                    System.out.print("Enter product ID: ");
+                    int billId = sc.nextInt();
+
+                    System.out.print("Enter quantity: ");
+                    int quantity = sc.nextInt();
+
+                    market.generateBill(billId, quantity);
+                    break;
+
+                case 5:
+                    System.out.print("Enter product ID: ");
+                    int couponId = sc.nextInt();
+
+                    System.out.print("Enter quantity: ");
+                    int couponQuantity = sc.nextInt();
+
+                    System.out.print("Enter coupon: ");
+                    String coupon = sc.next();
+
+                    market.couponBill(
+                        couponId,
+                        couponQuantity,
+                        coupon
+                    );
+                    break;
+
+                case 6:
+                    market.lowStock();
+                    break;
+
+                case 7:
+                    market.mostSold();
+                    break;
+
+                case 8:
+                    market.sortBySales();
+                    break;
+
+                case 9:
+                    System.out.println("Thank you!");
+                    sc.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+}
